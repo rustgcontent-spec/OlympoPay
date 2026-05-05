@@ -151,9 +151,9 @@ button:hover {
   color: #facc15;
 }
 
-.badge.late {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
+.badge.staff {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
 }
 
 .grid {
@@ -214,6 +214,18 @@ button:hover {
 
 .info-line strong {
   color: white;
+}
+
+.admin-player {
+  margin-top: 14px;
+  padding: 16px;
+  background: #0d0d15;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.admin-player h4 {
+  margin-bottom: 8px;
 }
 
 @media (max-width: 800px) {

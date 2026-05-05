@@ -1,6 +1,7 @@
 const players = {
   rustzin: {
-    password: "1234",
+    password: "091212",
+    access: "admin",
     name: "Rustzin",
     role: "Co-Owner / Player",
     status: "🟡 Em andamento",
@@ -16,7 +17,8 @@ const players = {
   },
 
   panettone: {
-    password: "5678",
+    password: "567885",
+    access: "player",
     name: "Panettone",
     role: "Player Competitivo",
     status: "🟡 Em andamento",
@@ -33,10 +35,11 @@ const players = {
 
   mtk: {
     password: "admin123",
+    access: "admin",
     name: "Mtk",
     role: "Owner",
     status: "⚪ Staff",
-    statusType: "pending",
+    statusType: "staff",
     value: "Não aplicável",
     due: "Não aplicável",
     contract: "Owner",
@@ -65,11 +68,7 @@ function logout() {
   window.location.href = "index.html";
 }
 
-function showSection(section) {
-  const nick = localStorage.getItem("olympo_player");
-  const player = players[nick];
-  const box = document.getElementById("dynamicContent");
-
+function setActive(section) {
   document.querySelectorAll(".sidebar a").forEach(a => {
     a.classList.remove("active");
   });
@@ -80,6 +79,15 @@ function showSection(section) {
   if (section === "pagamentos") links[1].classList.add("active");
   if (section === "contrato") links[2].classList.add("active");
   if (section === "avisos") links[3].classList.add("active");
+  if (section === "admin" && links[4]) links[4].classList.add("active");
+}
+
+function showSection(section) {
+  const nick = localStorage.getItem("olympo_player");
+  const player = players[nick];
+  const box = document.getElementById("dynamicContent");
+
+  setActive(section);
 
   if (section === "dashboard") {
     box.innerHTML = `
@@ -90,6 +98,7 @@ function showSection(section) {
       <div class="info-line"><strong>Nick:</strong> ${player.name}</div>
       <div class="info-line"><strong>Cargo:</strong> ${player.role}</div>
       <div class="info-line"><strong>Organização:</strong> ${player.organization}</div>
+      <div class="info-line"><strong>Nível de acesso:</strong> ${player.access === "admin" ? "Admin" : "Player"}</div>
     `;
   }
 
@@ -123,6 +132,42 @@ function showSection(section) {
       <p class="message">${player.message}</p>
     `;
   }
+
+  if (section === "admin") {
+    if (player.access !== "admin") {
+      box.innerHTML = `
+        <h3>Acesso negado</h3>
+        <p class="message">Você não tem permissão para acessar o painel admin.</p>
+      `;
+      return;
+    }
+
+    box.innerHTML = `
+      <h3>Painel Admin</h3>
+      <p class="message">
+        Área administrativa da OLYMPO. Aqui o owner/co-owner consegue visualizar os players cadastrados.
+      </p>
+
+      ${Object.keys(players).map(key => {
+        const p = players[key];
+
+        return `
+          <div class="admin-player">
+            <h4>${p.name}</h4>
+            <div class="info-line"><strong>Cargo:</strong> ${p.role}</div>
+            <div class="info-line"><strong>Acesso:</strong> ${p.access === "admin" ? "Admin" : "Player"}</div>
+            <div class="info-line"><strong>Status:</strong> ${p.status}</div>
+            <div class="info-line"><strong>Valor:</strong> ${p.value}</div>
+            <div class="info-line"><strong>Vencimento:</strong> ${p.due}</div>
+          </div>
+        `;
+      }).join("")}
+
+      <p class="message">
+        Para editar players nessa versão, altere os dados no arquivo script.js.
+      </p>
+    `;
+  }
 }
 
 const currentPage = window.location.pathname;
@@ -154,6 +199,10 @@ if (currentPage.includes("dashboard.html")) {
       <strong>${item.status}</strong>
     </div>
   `).join("");
+
+  if (player.access === "admin") {
+    document.getElementById("adminBtn").style.display = "block";
+  }
 
   showSection("dashboard");
 }
