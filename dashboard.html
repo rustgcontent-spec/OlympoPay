@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - OlympoPay</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <aside class="sidebar">
     <div class="logo">OLYMPO<span>PAY</span></div>
 
-    <a class="active" onclick="showSection('dashboard')">Dashboard</a>
+    <a onclick="showSection('dashboard')" class="active">Dashboard</a>
     <a onclick="showSection('pagamentos')">Pagamentos</a>
     <a onclick="showSection('contrato')">Contrato</a>
     <a onclick="showSection('avisos')">Avisos</a>
@@ -22,10 +22,10 @@
   <main class="dashboard">
     <section class="top">
       <div>
-        <p class="label">Bem-vindo de volta</p>
-        <h1 id="playerName">Player</h1>
+        <p class="label">Bem-vindo</p>
+        <h1 id="playerName">Carregando...</h1>
       </div>
-      <div id="statusBadge" class="badge">Carregando</div>
+      <div id="statusBadge" class="badge">---</div>
     </section>
 
     <section class="grid">
@@ -51,23 +51,11 @@
       </div>
     </section>
 
-    <section class="content">
-      <div class="card">
-        <h3>Histórico de pagamentos</h3>
-        <div id="history"></div>
-      </div>
-
-      <div class="card">
-        <h3>Aviso da staff</h3>
-        <p id="staffMessage" class="message">---</p>
-      </div>
-    </section>
-
     <section class="content-single">
-      <div class="card full-card" id="dynamicContent">Carregando...</div>
+      <div class="card" id="dynamicContent">Carregando...</div>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>

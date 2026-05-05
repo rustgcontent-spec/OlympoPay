@@ -1,208 +1,194 @@
-const players = {
-  rustzin: {
-    password: "091212",
-    access: "admin",
-    name: "Rustzin",
-    role: "Co-Owner / Player",
-    status: "🟡 Em andamento",
-    statusType: "pending",
-    value: "A definir",
-    due: "Primeiro mês em andamento",
-    contract: "Ativo",
-    organization: "OLYMPO",
-    message: "O primeiro mês da OLYMPO ainda está em andamento. Nenhum pagamento foi finalizado até o momento.",
-    history: [
-      { month: "Maio 2026", status: "🟡 Em andamento" }
-    ]
-  },
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-  panettone: {
-    password: "567885",
-    access: "player",
-    name: "Panettone",
-    role: "Player Competitivo",
-    status: "🟡 Em andamento",
-    statusType: "pending",
-    value: "A definir",
-    due: "Primeiro mês em andamento",
-    contract: "Ativo",
-    organization: "OLYMPO",
-    message: "O pagamento ainda não foi realizado porque o primeiro mês do time ainda não foi fechado.",
-    history: [
-      { month: "Maio 2026", status: "🟡 Em andamento" }
-    ]
-  },
+const supabase = createClient(
+  "https://reyhyamqikflphizqnap.supabase.co",
+  "sb_publishable_MQ3Lf1a8vpoQYqB45_N2GQ_3nh20eDU"
+);
 
-  mtk: {
-    password: "admin123",
-    access: "admin",
-    name: "Mtk",
-    role: "Owner",
-    status: "⚪ Staff",
-    statusType: "staff",
-    value: "Não aplicável",
-    due: "Não aplicável",
-    contract: "Owner",
-    organization: "OLYMPO",
-    message: "Conta administrativa do owner da OLYMPO.",
-    history: [
-      { month: "Maio 2026", status: "⚪ Staff" }
-    ]
-  }
-};
+let currentPlayer = null;
+let allPlayers = [];
 
-function login() {
-  const nick = document.getElementById("playerNick").value.toLowerCase().trim();
+window.login = async function () {
+  const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  if (players[nick] && players[nick].password === password) {
-    localStorage.setItem("olympo_player", nick);
-    window.location.href = "dashboard.html";
-  } else {
-    alert("Nick ou senha incorretos.");
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    alert("Email ou senha incorretos.");
+    return;
+  }
+
+  window.location.href = "dashboard.html";
+};
+
+window.logout = async function () {
+  await supabase.auth.signOut();
+  window.location.href = "index.html";
+};
+
+async function loadDashboard() {
+  const { data: sessionData } = await supabase.auth.getSession();
+
+  if (!sessionData.session) {
+    window.location.href = "index.html";
+    return;
+  }
+
+  const userId = sessionData.session.user.id;
+
+  const { data: player, error } = await supabase
+    .from("players")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error || !player) {
+    alert("Player não encontrado no banco.");
+    await supabase.auth.signOut();
+    window.location.href = "index.html";
+    return;
+  }
+
+  currentPlayer = player;
+
+  document.getElementById("playerName").innerText = player.nick;
+  document.getElementById("paymentStatus").innerText = player.payment_status;
+  document.getElementById("paymentText").innerText = player.role;
+  document.getElementById("paymentValue").innerText = player.payment_value;
+  document.getElementById("paymentDue").innerText = player.due_date;
+  document.getElementById("contractStatus").innerText = player.contract_status;
+
+  const badge = document.getElementById("statusBadge");
+  badge.innerText = player.payment_status;
+
+  if (player.access === "admin") {
+    document.getElementById("adminBtn").style.display = "block";
+    await loadAllPlayers();
+  }
+
+  showSection("dashboard");
+}
+
+async function loadAllPlayers() {
+  const { data, error } = await supabase
+    .from("players")
+    .select("*")
+    .order("nick");
+
+  if (!error) {
+    allPlayers = data;
   }
 }
 
-function logout() {
-  localStorage.removeItem("olympo_player");
-  window.location.href = "index.html";
-}
+window.showSection = function (section) {
+  document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
 
-function setActive(section) {
-  document.querySelectorAll(".sidebar a").forEach(a => {
-    a.classList.remove("active");
-  });
+  if (section === "dashboard") document.querySelectorAll(".sidebar a")[0].classList.add("active");
+  if (section === "pagamentos") document.querySelectorAll(".sidebar a")[1].classList.add("active");
+  if (section === "contrato") document.querySelectorAll(".sidebar a")[2].classList.add("active");
+  if (section === "avisos") document.querySelectorAll(".sidebar a")[3].classList.add("active");
+  if (section === "admin") document.querySelectorAll(".sidebar a")[4].classList.add("active");
 
-  const links = document.querySelectorAll(".sidebar a");
-
-  if (section === "dashboard") links[0].classList.add("active");
-  if (section === "pagamentos") links[1].classList.add("active");
-  if (section === "contrato") links[2].classList.add("active");
-  if (section === "avisos") links[3].classList.add("active");
-  if (section === "admin" && links[4]) links[4].classList.add("active");
-}
-
-function showSection(section) {
-  const nick = localStorage.getItem("olympo_player");
-  const player = players[nick];
   const box = document.getElementById("dynamicContent");
-
-  setActive(section);
 
   if (section === "dashboard") {
     box.innerHTML = `
-      <h3>Resumo do player</h3>
-      <p class="message">
-        Aqui você acompanha seu contrato, status de pagamento e avisos da staff da OLYMPO.
-      </p>
-      <div class="info-line"><strong>Nick:</strong> ${player.name}</div>
-      <div class="info-line"><strong>Cargo:</strong> ${player.role}</div>
-      <div class="info-line"><strong>Organização:</strong> ${player.organization}</div>
-      <div class="info-line"><strong>Nível de acesso:</strong> ${player.access === "admin" ? "Admin" : "Player"}</div>
+      <h3>Resumo</h3>
+      <div class="info-line"><strong>Nick:</strong> ${currentPlayer.nick}</div>
+      <div class="info-line"><strong>Cargo:</strong> ${currentPlayer.role}</div>
+      <div class="info-line"><strong>Acesso:</strong> ${currentPlayer.access}</div>
     `;
   }
 
   if (section === "pagamentos") {
     box.innerHTML = `
       <h3>Pagamentos</h3>
-      <div class="info-line"><strong>Status atual:</strong> ${player.status}</div>
-      <div class="info-line"><strong>Valor:</strong> ${player.value}</div>
-      <div class="info-line"><strong>Vencimento:</strong> ${player.due}</div>
-      <p class="message">
-        Como o primeiro mês ainda está em andamento, nenhum pagamento foi marcado como pago.
-      </p>
+      <div class="info-line"><strong>Status:</strong> ${currentPlayer.payment_status}</div>
+      <div class="info-line"><strong>Valor:</strong> ${currentPlayer.payment_value}</div>
+      <div class="info-line"><strong>Vencimento:</strong> ${currentPlayer.due_date}</div>
     `;
   }
 
   if (section === "contrato") {
     box.innerHTML = `
       <h3>Contrato</h3>
-      <div class="info-line"><strong>Status do contrato:</strong> ${player.contract}</div>
-      <div class="info-line"><strong>Cargo:</strong> ${player.role}</div>
-      <div class="info-line"><strong>Organização:</strong> ${player.organization}</div>
-      <p class="message">
-        Este portal serve apenas para consulta interna. O contrato oficial deve ser enviado separadamente pela staff.
-      </p>
+      <div class="info-line"><strong>Status:</strong> ${currentPlayer.contract_status}</div>
+      <div class="info-line"><strong>Cargo:</strong> ${currentPlayer.role}</div>
     `;
   }
 
   if (section === "avisos") {
     box.innerHTML = `
       <h3>Avisos da staff</h3>
-      <p class="message">${player.message}</p>
+      <p class="message">${currentPlayer.message}</p>
     `;
   }
 
   if (section === "admin") {
-    if (player.access !== "admin") {
-      box.innerHTML = `
-        <h3>Acesso negado</h3>
-        <p class="message">Você não tem permissão para acessar o painel admin.</p>
-      `;
+    if (currentPlayer.access !== "admin") {
+      box.innerHTML = `<h3>Acesso negado</h3>`;
       return;
     }
 
     box.innerHTML = `
       <h3>Painel Admin</h3>
-      <p class="message">
-        Área administrativa da OLYMPO. Aqui o owner/co-owner consegue visualizar os players cadastrados.
-      </p>
+      <p class="message">Edite os pagamentos dos players abaixo.</p>
 
-      ${Object.keys(players).map(key => {
-        const p = players[key];
+      ${allPlayers.map(player => `
+        <div class="admin-player">
+          <h4>${player.nick}</h4>
 
-        return `
-          <div class="admin-player">
-            <h4>${p.name}</h4>
-            <div class="info-line"><strong>Cargo:</strong> ${p.role}</div>
-            <div class="info-line"><strong>Acesso:</strong> ${p.access === "admin" ? "Admin" : "Player"}</div>
-            <div class="info-line"><strong>Status:</strong> ${p.status}</div>
-            <div class="info-line"><strong>Valor:</strong> ${p.value}</div>
-            <div class="info-line"><strong>Vencimento:</strong> ${p.due}</div>
-          </div>
-        `;
-      }).join("")}
+          <label>Status</label>
+          <input id="status-${player.id}" value="${player.payment_status}">
 
-      <p class="message">
-        Para editar players nessa versão, altere os dados no arquivo script.js.
-      </p>
+          <label>Valor</label>
+          <input id="value-${player.id}" value="${player.payment_value}">
+
+          <label>Vencimento</label>
+          <input id="due-${player.id}" value="${player.due_date}">
+
+          <label>Contrato</label>
+          <input id="contract-${player.id}" value="${player.contract_status}">
+
+          <label>Aviso</label>
+          <input id="message-${player.id}" value="${player.message}">
+
+          <button onclick="savePlayer('${player.id}')">Salvar</button>
+        </div>
+      `).join("")}
     `;
   }
-}
+};
 
-const currentPage = window.location.pathname;
+window.savePlayer = async function (id) {
+  const updates = {
+    payment_status: document.getElementById(`status-${id}`).value,
+    payment_value: document.getElementById(`value-${id}`).value,
+    due_date: document.getElementById(`due-${id}`).value,
+    contract_status: document.getElementById(`contract-${id}`).value,
+    message: document.getElementById(`message-${id}`).value
+  };
 
-if (currentPage.includes("dashboard.html")) {
-  const nick = localStorage.getItem("olympo_player");
+  const { error } = await supabase
+    .from("players")
+    .update(updates)
+    .eq("id", id);
 
-  if (!nick || !players[nick]) {
-    window.location.href = "index.html";
+  if (error) {
+    alert("Erro ao salvar.");
+    console.error(error);
+    return;
   }
 
-  const player = players[nick];
+  alert("Alterações salvas para todos os players.");
+  await loadAllPlayers();
+  location.reload();
+};
 
-  document.getElementById("playerName").innerText = player.name;
-  document.getElementById("paymentStatus").innerText = player.status;
-  document.getElementById("paymentText").innerText = player.role;
-  document.getElementById("paymentValue").innerText = player.value;
-  document.getElementById("paymentDue").innerText = player.due;
-  document.getElementById("contractStatus").innerText = player.contract;
-  document.getElementById("staffMessage").innerText = player.message;
-
-  const badge = document.getElementById("statusBadge");
-  badge.innerText = player.status;
-  badge.classList.add(player.statusType);
-
-  document.getElementById("history").innerHTML = player.history.map(item => `
-    <div class="history-item">
-      <span>${item.month}</span>
-      <strong>${item.status}</strong>
-    </div>
-  `).join("");
-
-  if (player.access === "admin") {
-    document.getElementById("adminBtn").style.display = "block";
-  }
-
-  showSection("dashboard");
+if (window.location.pathname.includes("dashboard.html")) {
+  loadDashboard();
 }

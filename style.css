@@ -251,5 +251,17 @@ button:hover {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
-  }
+  label {
+  display: block;
+  margin: 12px 0 6px;
+  color: #aaa;
+  font-size: 13px;
+}
+
+.admin-player {
+  margin-top: 18px;
+  padding: 18px;
+  background: #0d0d15;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
 }
