@@ -6,10 +6,10 @@ const supabase = createClient(
 );
 
 let currentPlayer = null;
-let allPlayers = [];
+let goals = [];
 
 window.login = async function () {
-  const email = document.getElementById("email").value.trim();
+  const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   const { error } = await supabase.auth.signInWithPassword({
@@ -18,7 +18,7 @@ window.login = async function () {
   });
 
   if (error) {
-    alert("Email ou senha incorretos.");
+    alert("Erro no login");
     return;
   }
 
@@ -31,178 +31,111 @@ window.logout = async function () {
 };
 
 async function loadDashboard() {
-  const { data: sessionData } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
-  if (!sessionData.session) {
+  if (!data.session) {
     window.location.href = "index.html";
     return;
   }
 
-  const userId = sessionData.session.user.id;
+  const userId = data.session.user.id;
 
-  const { data: player, error } = await supabase
+  const { data: player } = await supabase
     .from("players")
     .select("*")
     .eq("id", userId)
     .single();
 
-  if (error || !player) {
-    alert("Player não encontrado no banco.");
-    await supabase.auth.signOut();
-    window.location.href = "index.html";
-    return;
-  }
-
   currentPlayer = player;
 
   document.getElementById("playerName").innerText = player.nick;
-  document.getElementById("playerRole").innerText = `${player.role} • OLYMPO`;
-  document.getElementById("paymentStatus").innerText = player.payment_status;
-  document.getElementById("paymentValue").innerText = player.payment_value;
-  document.getElementById("paymentDue").innerText = player.due_date;
-  document.getElementById("contractStatus").innerText = player.contract_status;
-  document.getElementById("staffMessage").innerText = player.message;
-
-  const badge = document.getElementById("statusBadge");
-  badge.innerText = player.payment_status;
 
   if (player.access === "admin") {
     document.getElementById("adminBtn").style.display = "block";
-    await loadAllPlayers();
   }
+
+  await loadGoals(userId);
 
   showSection("dashboard");
 }
 
-async function loadAllPlayers() {
-  const { data, error } = await supabase
-    .from("players")
+async function loadGoals(id) {
+  const { data } = await supabase
+    .from("goals")
     .select("*")
-    .order("nick");
+    .eq("player_id", id);
 
-  if (!error) {
-    allPlayers = data;
-  }
-}
-
-function setActive(section) {
-  document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
-
-  const links = document.querySelectorAll(".sidebar a");
-
-  if (section === "dashboard") links[0].classList.add("active");
-  if (section === "pagamentos") links[1].classList.add("active");
-  if (section === "contrato") links[2].classList.add("active");
-  if (section === "avisos") links[3].classList.add("active");
-  if (section === "admin" && links[4]) links[4].classList.add("active");
+  goals = data;
 }
 
 window.showSection = function (section) {
-  if (!currentPlayer) return;
-
-  setActive(section);
-
-  const box = document.getElementById("dynamicContent");
+  const box = document.getElementById("content");
 
   if (section === "dashboard") {
     box.innerHTML = `
-      <h3>Resumo competitivo</h3>
-      <div class="info-line"><strong>Nick:</strong> ${currentPlayer.nick}</div>
-      <div class="info-line"><strong>Cargo:</strong> ${currentPlayer.role}</div>
-      <div class="info-line"><strong>Acesso:</strong> ${currentPlayer.access}</div>
-      <div class="info-line"><strong>Organização:</strong> OLYMPO</div>
-      <div class="info-line"><strong>Status competitivo:</strong> Ativo</div>
+      <h2>Status: ${currentPlayer.payment_status}</h2>
+      <p>Valor: ${currentPlayer.payment_value}</p>
+      <p>Contrato: ${currentPlayer.contract_status}</p>
     `;
   }
 
-  if (section === "pagamentos") {
-    box.innerHTML = `
-      <h3>Pagamentos</h3>
-      <div class="info-line"><strong>Status atual:</strong> ${currentPlayer.payment_status}</div>
-      <div class="info-line"><strong>Valor:</strong> ${currentPlayer.payment_value}</div>
-      <div class="info-line"><strong>Vencimento:</strong> ${currentPlayer.due_date}</div>
-      <div class="info-line"><strong>Observação:</strong> pagamentos definidos após fechamento do mês competitivo.</div>
-    `;
-  }
+  if (section === "metas") {
+    let total = 0;
+    let earned = 0;
 
-  if (section === "contrato") {
-    box.innerHTML = `
-      <h3>Contrato</h3>
-      <div class="info-line"><strong>Status:</strong> ${currentPlayer.contract_status}</div>
-      <div class="info-line"><strong>Cargo:</strong> ${currentPlayer.role}</div>
-      <div class="info-line"><strong>Time:</strong> OLYMPO</div>
-      <div class="info-line"><strong>Tipo:</strong> Representação competitiva</div>
-    `;
-  }
+    goals.forEach(g => {
+      const v = Number(g.reward.replace("R$", ""));
+      total += v;
+      if (g.status.includes("✅")) earned += v;
+    });
 
-  if (section === "avisos") {
     box.innerHTML = `
-      <h3>Avisos da staff</h3>
-      <p class="message">${currentPlayer.message}</p>
+      <h2>Metas</h2>
+      <p>Bônus: R$${earned} / R$${total}</p>
+
+      ${goals.map(g => `
+        <div class="goal">
+          <strong>${g.title}</strong>
+          <p>${g.status}</p>
+          <p>${g.reward}</p>
+        </div>
+      `).join("")}
     `;
   }
 
   if (section === "admin") {
-    if (currentPlayer.access !== "admin") {
-      box.innerHTML = `<h3>Acesso negado</h3>`;
-      return;
-    }
+    if (currentPlayer.access !== "admin") return;
 
     box.innerHTML = `
-      <h3>Painel Admin</h3>
-      <p class="message">Edite os pagamentos e avisos dos players.</p>
+      <h2>Admin</h2>
 
-      ${allPlayers.map(player => `
-        <div class="admin-player">
-          <h4>${player.nick}</h4>
+      ${goals.map(g => `
+        <div class="goal">
+          <strong>${g.title}</strong>
 
-          <label>Status</label>
-          <input id="status-${player.id}" value="${player.payment_status || ""}">
+          <select id="status-${g.id}">
+            <option>🟡 Em andamento</option>
+            <option>✅ Concluído</option>
+            <option>❌ Não concluído</option>
+          </select>
 
-          <label>Valor</label>
-          <input id="value-${player.id}" value="${player.payment_value || ""}">
-
-          <label>Vencimento</label>
-          <input id="due-${player.id}" value="${player.due_date || ""}">
-
-          <label>Contrato</label>
-          <input id="contract-${player.id}" value="${player.contract_status || ""}">
-
-          <label>Cargo</label>
-          <input id="role-${player.id}" value="${player.role || ""}">
-
-          <label>Aviso da staff</label>
-          <input id="message-${player.id}" value="${player.message || ""}">
-
-          <button onclick="savePlayer('${player.id}')">Salvar alterações</button>
+          <button onclick="updateGoal('${g.id}')">Salvar</button>
         </div>
       `).join("")}
     `;
   }
 };
 
-window.savePlayer = async function (id) {
-  const updates = {
-    payment_status: document.getElementById(`status-${id}`).value,
-    payment_value: document.getElementById(`value-${id}`).value,
-    due_date: document.getElementById(`due-${id}`).value,
-    contract_status: document.getElementById(`contract-${id}`).value,
-    role: document.getElementById(`role-${id}`).value,
-    message: document.getElementById(`message-${id}`).value
-  };
+window.updateGoal = async function (id) {
+  const status = document.getElementById(`status-${id}`).value;
 
-  const { error } = await supabase
-    .from("players")
-    .update(updates)
+  await supabase
+    .from("goals")
+    .update({ status })
     .eq("id", id);
 
-  if (error) {
-    alert("Erro ao salvar.");
-    console.error(error);
-    return;
-  }
+  alert("Meta atualizada");
 
-  alert("Alterações salvas.");
   location.reload();
 };
 
