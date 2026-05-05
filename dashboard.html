@@ -7,12 +7,15 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+
   <aside class="sidebar">
     <div class="logo">OLYMPO<span>PAY</span></div>
-    <a class="active">Dashboard</a>
-    <a>Pagamentos</a>
-    <a>Contrato</a>
-    <a>Avisos</a>
+
+    <a class="active" onclick="showSection('dashboard')">Dashboard</a>
+    <a onclick="showSection('pagamentos')">Pagamentos</a>
+    <a onclick="showSection('contrato')">Contrato</a>
+    <a onclick="showSection('avisos')">Avisos</a>
+
     <button onclick="logout()" class="logout">Sair</button>
   </aside>
 
@@ -22,6 +25,7 @@
         <p class="label">Bem-vindo de volta</p>
         <h1 id="playerName">Player</h1>
       </div>
+
       <div id="statusBadge" class="badge">Carregando</div>
     </section>
 
@@ -57,6 +61,12 @@
       <div class="card">
         <h3>Aviso da staff</h3>
         <p id="staffMessage" class="message">---</p>
+      </div>
+    </section>
+
+    <section class="content-single">
+      <div class="card full-card" id="dynamicContent">
+        Carregando...
       </div>
     </section>
   </main>
