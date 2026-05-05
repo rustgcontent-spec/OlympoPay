@@ -56,11 +56,12 @@ async function loadDashboard() {
   currentPlayer = player;
 
   document.getElementById("playerName").innerText = player.nick;
+  document.getElementById("playerRole").innerText = `${player.role} • OLYMPO`;
   document.getElementById("paymentStatus").innerText = player.payment_status;
-  document.getElementById("paymentText").innerText = player.role;
   document.getElementById("paymentValue").innerText = player.payment_value;
   document.getElementById("paymentDue").innerText = player.due_date;
   document.getElementById("contractStatus").innerText = player.contract_status;
+  document.getElementById("staffMessage").innerText = player.message;
 
   const badge = document.getElementById("statusBadge");
   badge.innerText = player.payment_status;
@@ -84,32 +85,43 @@ async function loadAllPlayers() {
   }
 }
 
-window.showSection = function (section) {
+function setActive(section) {
   document.querySelectorAll(".sidebar a").forEach(a => a.classList.remove("active"));
 
-  if (section === "dashboard") document.querySelectorAll(".sidebar a")[0].classList.add("active");
-  if (section === "pagamentos") document.querySelectorAll(".sidebar a")[1].classList.add("active");
-  if (section === "contrato") document.querySelectorAll(".sidebar a")[2].classList.add("active");
-  if (section === "avisos") document.querySelectorAll(".sidebar a")[3].classList.add("active");
-  if (section === "admin") document.querySelectorAll(".sidebar a")[4].classList.add("active");
+  const links = document.querySelectorAll(".sidebar a");
+
+  if (section === "dashboard") links[0].classList.add("active");
+  if (section === "pagamentos") links[1].classList.add("active");
+  if (section === "contrato") links[2].classList.add("active");
+  if (section === "avisos") links[3].classList.add("active");
+  if (section === "admin" && links[4]) links[4].classList.add("active");
+}
+
+window.showSection = function (section) {
+  if (!currentPlayer) return;
+
+  setActive(section);
 
   const box = document.getElementById("dynamicContent");
 
   if (section === "dashboard") {
     box.innerHTML = `
-      <h3>Resumo</h3>
+      <h3>Resumo competitivo</h3>
       <div class="info-line"><strong>Nick:</strong> ${currentPlayer.nick}</div>
       <div class="info-line"><strong>Cargo:</strong> ${currentPlayer.role}</div>
       <div class="info-line"><strong>Acesso:</strong> ${currentPlayer.access}</div>
+      <div class="info-line"><strong>Organização:</strong> OLYMPO</div>
+      <div class="info-line"><strong>Status competitivo:</strong> Ativo</div>
     `;
   }
 
   if (section === "pagamentos") {
     box.innerHTML = `
       <h3>Pagamentos</h3>
-      <div class="info-line"><strong>Status:</strong> ${currentPlayer.payment_status}</div>
+      <div class="info-line"><strong>Status atual:</strong> ${currentPlayer.payment_status}</div>
       <div class="info-line"><strong>Valor:</strong> ${currentPlayer.payment_value}</div>
       <div class="info-line"><strong>Vencimento:</strong> ${currentPlayer.due_date}</div>
+      <div class="info-line"><strong>Observação:</strong> pagamentos definidos após fechamento do mês competitivo.</div>
     `;
   }
 
@@ -118,6 +130,8 @@ window.showSection = function (section) {
       <h3>Contrato</h3>
       <div class="info-line"><strong>Status:</strong> ${currentPlayer.contract_status}</div>
       <div class="info-line"><strong>Cargo:</strong> ${currentPlayer.role}</div>
+      <div class="info-line"><strong>Time:</strong> OLYMPO</div>
+      <div class="info-line"><strong>Tipo:</strong> Representação competitiva</div>
     `;
   }
 
@@ -136,28 +150,31 @@ window.showSection = function (section) {
 
     box.innerHTML = `
       <h3>Painel Admin</h3>
-      <p class="message">Edite os pagamentos dos players abaixo.</p>
+      <p class="message">Edite os pagamentos e avisos dos players.</p>
 
       ${allPlayers.map(player => `
         <div class="admin-player">
           <h4>${player.nick}</h4>
 
           <label>Status</label>
-          <input id="status-${player.id}" value="${player.payment_status}">
+          <input id="status-${player.id}" value="${player.payment_status || ""}">
 
           <label>Valor</label>
-          <input id="value-${player.id}" value="${player.payment_value}">
+          <input id="value-${player.id}" value="${player.payment_value || ""}">
 
           <label>Vencimento</label>
-          <input id="due-${player.id}" value="${player.due_date}">
+          <input id="due-${player.id}" value="${player.due_date || ""}">
 
           <label>Contrato</label>
-          <input id="contract-${player.id}" value="${player.contract_status}">
+          <input id="contract-${player.id}" value="${player.contract_status || ""}">
 
-          <label>Aviso</label>
-          <input id="message-${player.id}" value="${player.message}">
+          <label>Cargo</label>
+          <input id="role-${player.id}" value="${player.role || ""}">
 
-          <button onclick="savePlayer('${player.id}')">Salvar</button>
+          <label>Aviso da staff</label>
+          <input id="message-${player.id}" value="${player.message || ""}">
+
+          <button onclick="savePlayer('${player.id}')">Salvar alterações</button>
         </div>
       `).join("")}
     `;
@@ -170,6 +187,7 @@ window.savePlayer = async function (id) {
     payment_value: document.getElementById(`value-${id}`).value,
     due_date: document.getElementById(`due-${id}`).value,
     contract_status: document.getElementById(`contract-${id}`).value,
+    role: document.getElementById(`role-${id}`).value,
     message: document.getElementById(`message-${id}`).value
   };
 
@@ -184,8 +202,7 @@ window.savePlayer = async function (id) {
     return;
   }
 
-  alert("Alterações salvas para todos os players.");
-  await loadAllPlayers();
+  alert("Alterações salvas.");
   location.reload();
 };
 
