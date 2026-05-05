@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - OlympoPay</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <aside class="sidebar">
     <div class="brand">OLYMPO<span>PAY</span></div>
     <p class="side-subtitle">Private Portal</p>
 
     <nav>
-      <a onclick="showSection('dashboard')" class="active">Dashboard</a>
-      <a onclick="showSection('pagamentos')">Pagamentos</a>
-      <a onclick="showSection('contrato')">Contrato</a>
-      <a onclick="showSection('avisos')">Avisos</a>
-      <a onclick="showSection('metas')">Metas</a>
-      <a onclick="showSection('admin')" id="adminBtn" style="display:none;">Admin</a>
+      <a id="nav-dashboard" onclick="showSection('dashboard')" class="active">Dashboard</a>
+      <a id="nav-pagamentos" onclick="showSection('pagamentos')">Pagamentos</a>
+      <a id="nav-contrato" onclick="showSection('contrato')">Contrato</a>
+      <a id="nav-avisos" onclick="showSection('avisos')">Avisos</a>
+      <a id="nav-metas" onclick="showSection('metas')">Metas</a>
+      <a id="adminBtn" onclick="showSection('admin')" style="display:none;">Admin</a>
     </nav>
 
     <button onclick="logout()" class="logout">Sair</button>
@@ -64,9 +65,7 @@
     </section>
 
     <section class="main-grid">
-      <div class="card big-card" id="dynamicContent">
-        Carregando...
-      </div>
+      <div class="card big-card" id="dynamicContent">Carregando...</div>
 
       <div class="card staff-card">
         <p class="label">Aviso da staff</p>

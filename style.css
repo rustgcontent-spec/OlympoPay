@@ -271,6 +271,18 @@ button:hover {
   padding: 18px;
 }
 
+.goal-status {
+  margin-top: 8px;
+  color: #facc15;
+  font-weight: 800;
+}
+
+.goal-money {
+  margin-top: 6px;
+  color: #4ade80;
+  font-weight: 800;
+}
+
 label {
   display: block;
   margin: 12px 0 6px;
