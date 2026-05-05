@@ -1,46 +1,66 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - OlympoPay</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <aside class="sidebar">
+    <div class="logo">OLYMPO<span>PAY</span></div>
+    <a class="active">Dashboard</a>
+    <a>Pagamentos</a>
+    <a>Contrato</a>
+    <a>Avisos</a>
+    <button onclick="logout()" class="logout">Sair</button>
+  </aside>
 
-<div class="box">
-  <h1>OLYMPO PAY</h1>
-  <div id="info"></div>
-</div>
+  <main class="dashboard">
+    <section class="top">
+      <div>
+        <p class="label">Bem-vindo de volta</p>
+        <h1 id="playerName">Player</h1>
+      </div>
+      <div id="statusBadge" class="badge">Carregando</div>
+    </section>
 
-<script>
-let player = localStorage.getItem("player");
+    <section class="grid">
+      <div class="card main-card">
+        <p class="label">Pagamento atual</p>
+        <h2 id="paymentStatus">---</h2>
+        <p id="paymentText">---</p>
+      </div>
 
-let data = {
-  rustzin: {
-    status: "✅ Pago",
-    valor: "R$100",
-    vencimento: "10/06"
-  },
-  panettone: {
-    status: "🟡 Pendente",
-    valor: "R$100",
-    vencimento: "10/05"
-  }
-};
+      <div class="card">
+        <p class="label">Valor</p>
+        <h2 id="paymentValue">---</h2>
+      </div>
 
-if(!player){
-  window.location.href = "index.html";
-}
+      <div class="card">
+        <p class="label">Vencimento</p>
+        <h2 id="paymentDue">---</h2>
+      </div>
 
-let p = data[player];
+      <div class="card">
+        <p class="label">Contrato</p>
+        <h2 id="contractStatus">---</h2>
+      </div>
+    </section>
 
-document.getElementById("info").innerHTML = `
-  <h2>${player}</h2>
-  <p>Status: ${p.status}</p>
-  <p>Valor: ${p.valor}</p>
-  <p>Vencimento: ${p.vencimento}</p>
-`;
-</script>
+    <section class="content">
+      <div class="card">
+        <h3>Histórico de pagamentos</h3>
+        <div id="history"></div>
+      </div>
 
+      <div class="card">
+        <h3>Aviso da staff</h3>
+        <p id="staffMessage" class="message">---</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
 </body>
 </html>

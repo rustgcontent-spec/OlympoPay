@@ -1,20 +1,22 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>OlympoPay - Login</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OlympoPay</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body class="login-body">
+  <main class="login-card">
+    <div class="logo">OLYMPO<span>PAY</span></div>
+    <p class="subtitle">Portal privado de pagamentos</p>
 
-<div class="box">
-  <h1>OLYMPO PAY</h1>
-  <p>Acesso restrito</p>
+    <input id="playerNick" type="text" placeholder="Digite seu nick" />
+    <button onclick="login()">Entrar no portal</button>
 
-  <input type="text" id="user" placeholder="Seu nome">
-  <button onclick="login()">Entrar</button>
-</div>
+    <p class="small">Acesso restrito para players autorizados.</p>
+  </main>
 
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
