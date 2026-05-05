@@ -1,30 +1,81 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - OlympoPay</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <aside class="sidebar">
+    <div class="brand">OLYMPO<span>PAY</span></div>
+    <p class="side-subtitle">Private Portal</p>
 
-<div class="sidebar">
-  <h2>OLYMPO<span>PAY</span></h2>
+    <nav>
+      <a onclick="showSection('dashboard')" class="active">Dashboard</a>
+      <a onclick="showSection('pagamentos')">Pagamentos</a>
+      <a onclick="showSection('contrato')">Contrato</a>
+      <a onclick="showSection('avisos')">Avisos</a>
+      <a onclick="showSection('metas')">Metas</a>
+      <a onclick="showSection('admin')" id="adminBtn" style="display:none;">Admin</a>
+    </nav>
 
-  <button onclick="showSection('dashboard')">Dashboard</button>
-  <button onclick="showSection('metas')">Metas</button>
-  <button onclick="showSection('admin')" id="adminBtn" style="display:none;">Admin</button>
+    <button onclick="logout()" class="logout">Sair</button>
+  </aside>
 
-  <button onclick="logout()">Sair</button>
-</div>
+  <main class="dashboard">
+    <section class="hero">
+      <div>
+        <p class="label">Player Dashboard</p>
+        <h1 id="playerName">Carregando...</h1>
+        <p id="playerRole" class="hero-sub">---</p>
+      </div>
 
-<div class="main">
+      <div class="hero-right">
+        <div id="statusBadge" class="badge">---</div>
+        <p class="season">Season: Maio 2026</p>
+      </div>
+    </section>
 
-  <h1 id="playerName"></h1>
+    <section class="cards-grid">
+      <div class="card highlight-card">
+        <p class="label">Status do mês</p>
+        <h2 id="paymentStatus">---</h2>
+        <p class="muted">Primeiro ciclo competitivo da OLYMPO.</p>
+      </div>
 
-  <div id="content"></div>
+      <div class="card">
+        <p class="label">Pagamento</p>
+        <h2 id="paymentValue">---</h2>
+        <p class="muted">Definido após fechamento.</p>
+      </div>
 
-</div>
+      <div class="card">
+        <p class="label">Vencimento</p>
+        <h2 id="paymentDue">---</h2>
+        <p class="muted">Período atual.</p>
+      </div>
 
-<script type="module" src="script.js"></script>
+      <div class="card">
+        <p class="label">Contrato</p>
+        <h2 id="contractStatus">---</h2>
+        <p class="muted">Status interno.</p>
+      </div>
+    </section>
+
+    <section class="main-grid">
+      <div class="card big-card" id="dynamicContent">
+        Carregando...
+      </div>
+
+      <div class="card staff-card">
+        <p class="label">Aviso da staff</p>
+        <h3>Atualização interna</h3>
+        <p id="staffMessage" class="message">---</p>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="script.js"></script>
 </body>
 </html>
