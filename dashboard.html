@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="box">
+  <h1>OLYMPO PAY</h1>
+  <div id="info"></div>
+</div>
+
+<script>
+let player = localStorage.getItem("player");
+
+let data = {
+  rustzin: {
+    status: "✅ Pago",
+    valor: "R$100",
+    vencimento: "10/06"
+  },
+  panettone: {
+    status: "🟡 Pendente",
+    valor: "R$100",
+    vencimento: "10/05"
+  }
+};
+
+if(!player){
+  window.location.href = "index.html";
+}
+
+let p = data[player];
+
+document.getElementById("info").innerHTML = `
+  <h2>${player}</h2>
+  <p>Status: ${p.status}</p>
+  <p>Valor: ${p.valor}</p>
+  <p>Vencimento: ${p.vencimento}</p>
+`;
+</script>
+
+</body>
+</html>
